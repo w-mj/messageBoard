@@ -28,35 +28,38 @@ $setu = isset($_POST['username']) && $_POST['username'] != '';
 $setp = isset($_POST['password']) && $_POST['password'] != '';
 $setr = isset($_POST['repeat']) && $_POST['repeat'] != '';
 
-if($_SERVER['REQUEST_METHOD'] == "POST") {
+if (isset($_SESSION['signUpTimes'])) {
     if ($setu == '')
         echo "<div class='text'> 用户名不能为空</div>";
     else if ($setp == '')
         echo "<div class='text'> 密码不能为空</div>";
     else if ($setr == '')
         echo "<div class='text'> 重复密码不能为空</div>";
-    else {
-        ($db = New mysqli('localhost', 'msgboard', 'root', 'msgBoard')) or die('打开数据库失败');
-        $db -> query("SET NAMES UTF-8");
-        $db -> query("set character set 'utf8'");
-        $input_username = $db->real_escape_string($_POST['username']);
-        $input_password = $db->real_escape_string($_POST['password']);
-        $input_repeatpsd = $db->real_escape_string($_POST['repeat']);
+} else  {
+    $_SESSION['signUpTimes'] = 1;
+}
+if ($setu != '' && $setp != '' && $setr != '') {
+    ($db = New mysqli('localhost', 'msgboard', 'root', 'msgBoard')) or die('打开数据库失败');
+    $db -> query("SET NAMES UTF-8");
+    $db -> query("set character set 'utf8'");
+    $input_username = $db->real_escape_string($_POST['username']);
+    $input_password = $db->real_escape_string($_POST['password']);
+    $input_repeatpsd = $db->real_escape_string($_POST['repeat']);
 
-        $quarry = "SELECT * FROM userinfo WHERE username='$input_username'";
-        ($result = $db->query($quarry)) or die('数据库查询失败');
-        $arr = mysqli_fetch_array($result, MYSQLI_ASSOC);
-        if ($arr) {
-            echo "<div class='text'>用户名已被占用</div>";
-        } elseif ($input_password != $input_repeatpsd)
-            echo "<div class='text'>两次密码不匹配</div>";
-        else {
-            $quarry = "INSERT INTO userinfo(username, password) VALUES('$input_username', '$input_password')";
-            $answer = $db->query($quarry);
-            echo "<div class='text'>创建账户成功</div>";
-            $notFirst = false;
-            echo "<script>window.location.href='login.php'</script>";
-        }
+    $quarry = "SELECT * FROM userinfo WHERE username='$input_username'";
+    ($result = $db->query($quarry)) or die('数据库查询失败');
+    $arr = mysqli_fetch_array($result, MYSQLI_ASSOC);
+    if ($arr) {
+        echo "<div class='text'>用户名已被占用</div>";
+    } elseif ($input_password != $input_repeatpsd)
+        echo "<div class='text'>两次密码不匹配</div>";
+    else {
+        $quarry = "INSERT INTO userinfo(username, password) VALUES('$input_username', '$input_password')";
+        $answer = $db->query($quarry);
+        echo "<div class='text'>创建账户成功</div>";
+        $notFirst = false;
+        unset($_SESSION['signUpTimes']);
+        echo "<script>window.location.href='login.php'</script>";
     }
 }
 

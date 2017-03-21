@@ -40,22 +40,28 @@ if (isset($_SESSION['username']) && isset($_SESSION['userid'])) {
     echo "<form method='post' action='index.php'>";
     echo "<textarea class='inputBox' style='font-size: 120%;' name='commit'></textarea>";
     echo "<br />";
+    echo "<label id ='hidebox'><input type='checkbox' name='hide' value='yes'/> 匿名</label>";
     echo "<input class='button' id='submitButton' type='submit' value='提交' / >";
     echo "</form>";
     echo "<form method='post' action='index.php'>";
     echo "<input type='hidden' name='signOut' value='1'>";
     echo "<input class='button' id='quitButton' type='submit' value='退出' / >";
     echo "</form></div>";
+
     if (isset($_POST['signOut']) && $_POST['signOut'] != '') {
         // 退出登录
         unset($_SESSION['userid']);
         unset($_SESSION['username']);
-        setcookie('saveuser', -1 , time(), '/');
+        setcookie('saveuser', '' , time(), '/');
         echo '<script> location.replace(location.href); </script>';
     } elseif (isset($_POST['commit']) && $_POST['commit'] != '') {
         // 提交留言
 
-        $userid = $_SESSION['userid'];
+        if (isset($_POST['hide']) && $_POST['hide'] == 'yes') {
+            $userid = 5;
+        } else {
+            $userid = $_SESSION['userid'];
+        }
         $context = $db -> real_escape_string($_POST['commit']);
 
         $query = "INSERT INTO message(userid, tm, context, public, target) VALUES ($userid, SYSDATE(),'$context',1,0)";
